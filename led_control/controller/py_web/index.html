@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LED Controller</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 200px;
+            background-color: #1e1e1e;
+            /* 背景深黑灰色，柔和 */
+            color: #ffffff;
+            /* 文字颜色白色 */
+        }
+
+        h1 {
+            font-size: 3em;
+            margin-bottom: 130px;
+        }
+
+        button {
+            padding: 8px 15px;
+            font-size: 18px;
+            margin: 10px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #555;
+            color: #fff;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #777;
+        }
+
+        button:active {
+            transform: scale(0.95);
+            /* 点击时缩小效果 */
+        }
+
+        p#response {
+            margin-top: 30px;
+            font-size: 17px;
+            color: rgb(181, 181, 181);
+        }
+    </style>
+</head>
+
+<body>
+    <h1>LED Controller</h1>
+    <button onclick="controlLED('1')">Turn ON</button>
+    <button onclick="controlLED('0')">Turn OFF</button>
+    <p id="response"></p>
+
+    <script>
+        async function controlLED(command) {
+            const responseElement = document.getElementById('response');
+            responseElement.textContent = 'Sending...';
+
+            try {
+                const response = await fetch('http://localhost:5000/control', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ command: command }),
+                });
+
+                const result = await response.json();
+                if (response.ok) {
+                    responseElement.textContent = result.message || 'Success';
+                } else {
+                    responseElement.textContent = `Error: ${result.error || 'Unknown error'}`;
+                }
+            } catch (error) {
+                responseElement.textContent = `Error: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+
+</html>

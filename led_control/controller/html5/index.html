@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LED Controller via Serial</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+            background-color: #1e1e1e;
+            color: #ffffff;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 10px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #555;
+            color: #fff;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+        button:hover {
+            background-color: #777;
+        }
+        button:active {
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+<body>
+    <h1>LED Controller</h1>
+    <button id="connect">Connect to Serial</button>
+    <button id="ledOn" disabled>Turn ON</button>
+    <button id="ledOff" disabled>Turn OFF</button>
+    <p id="status">Status: Not Connected</p>
+
+    <script>
+        let port;
+        let writer;
+
+        document.getElementById('connect').addEventListener('click', async () => {
+            try {
+                // 1. 请求用户授权访问串口设备
+                port = await navigator.serial.requestPort();
+                await port.open({ baudRate: 9600 });
+                writer = port.writable.getWriter();
+
+                document.getElementById('status').textContent = 'Status: Connected';
+                document.getElementById('ledOn').disabled = false;
+                document.getElementById('ledOff').disabled = false;
+            } catch (error) {
+                console.error('Failed to connect:', error);
+                document.getElementById('status').textContent = 'Status: Failed to Connect';
+            }
+        });
+
+        document.getElementById('ledOn').addEventListener('click', async () => {
+            if (writer) {
+                await writer.write(new Uint8Array([49])); // ASCII '1'
+                document.getElementById('status').textContent = 'LED is ON';
+            }
+        });
+
+        document.getElementById('ledOff').addEventListener('click', async () => {
+            if (writer) {
+                await writer.write(new Uint8Array([48])); // ASCII '0'
+                document.getElementById('status').textContent = 'LED is OFF';
+            }
+        });
+    </script>
+</body>
+</html>
